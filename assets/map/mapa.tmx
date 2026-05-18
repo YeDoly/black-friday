@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="46">
+ <properties>
+  <property name="kolizja" type="bool" value="true"/>
+ </properties>
+ <tileset firstgid="1" source="kafelki1.tsx"/>
+ <tileset firstgid="4151" source="kafelki2.tsx"/>
+ <tileset firstgid="8301" source="kafelki3.tsx"/>
+ <tileset firstgid="13997" source="kafelki4.tsx"/>
+ <layer id="1" name="Podłoga" width="60" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt0bEJwDAUQ8E/mLNSsn8XD2EQyFeI1+vWzDx765K+e99FTf/Nly9fvnz58u1v+m++fPny5cuXb3/Tf/Ply5cvX758+5v+my9fvnz58uXb3/TffPny5cuXL9/+pv/my/dkf0JB6iI=
+  </data>
+ </layer>
+ <layer id="3" name="Regały" width="60" height="50">
+  <properties>
+   <property name="kolizja" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztmsdNBDEYRt0COYpwmALI7IIWKIG8gR4QeXehCkIThAuhC0IThDZ459FYHktYY7Hfk55ky59/jU/fZYzpPG5LxtzhPT6U8mV8977f8BfzbZlP1l/4jT+Wu+mM795FiPm2zFjZmHGcwMly9t10xnfvIsR8W6bKuoZ1bFjupjO+exch5tsyl6yv8BpvLHfTGd+9ixDzbZlX1m/4jh+Wu+mM795FiPm+3yCEEDExlBgznLhzXWS6sQd7sQ/7cQAHE/d50fNHyIxiCcs58lNkpnEGZ3EO53EBFxP3edHzl8gsYw3rOfLrZDZwE7dwG3dwF6uJ+7zo+Q0ye9jCdo78AZlDPMJjPMFTPMNm4j4vev45mYscOSFEvKh/s1H/qn/Vv0KIkKh/s1H/qn/Vv0KIkMTSv6GJrX9DE1v/hia2/g2N+lf8d/b1T4cQ0VKpGLOCq7hWKfprwtPkjS1s43kHvPeRNz7hM750wHuz+AXeFpyb
+  </data>
+ </layer>
+ <layer id="5" name="Palety" width="60" height="50">
+  <properties>
+   <property name="kolizja" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztl0tOAkEURWsJiIiuQwYggV6Ays916EBwCQKi7gRkCeAHWASKO/FzEh10Ogzpqkr1PclJJT3pd/M69foZI9Lgq27MN/6gif6eHXOWIqdlpUaZXBU8wep/xkvOq0DzXpOriz28ibb3OyTGZJrgE06j7f0OmWS/QyfZbyGEEEIIn1jXjHnHD9zgZ811RelSYMc4wCIe4lHddUXp0iRfC9vYwYvA896Rb4T3+ICPO8rr6476Sj1vuMAlrnaUNws7arynWdhR4z3Nwo6ahZ7GSfbU1n2V4x17mMd9R/PF5n11SsYzPMeGo7w2v+1bMvZxgENHeW3eVzMyzvEZXwL/XxJC+IUP89QmPsxTm/gwT22ieSqEEEIIIYQQfvMLS/NkwA==
+  </data>
+ </layer>
+ <layer id="6" name="Butelkomat" width="60" height="50">
+  <properties>
+   <property name="kolizja" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztz0EVggAURNHfQy0COcRYaAo1CphCLcKkgMW/95zZz6sCAAAAAAAAAAAA6Oc5VL2y93D0k3180/nL/k16T2PVObuMRz/ZxzWdU3Zr0jun8549mvQu6VyzT4PeDSnSDiM=
+  </data>
+ </layer>
+ <layer id="2" name="Ściany" width="60" height="50">
+  <properties>
+   <property name="kolizja" type="bool" value="false"/>
+   <property name="statyczne" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzt2kENACAMBEFE4N8I5nBByHQ3uX/n37PXOsM2pbx2ee3y2uW1y2uX1y6vXV67vHZ57fLa5bXLa5fXLq9dXru8dnnt8trltctrl9cur91U7w8/1q/uuNgEqDE=
+  </data>
+ </layer>
+ <layer id="4" name="Drzwi" width="60" height="50">
+  <properties>
+   <property name="kolizja" type="bool" value="false"/>
+   <property name="statyczne" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztx8EJwCAQRFFF+69grdIGNIfg2kAO4T34DFMKAAAAAAAAAAAAAACv2I1UpI30/2S2U+33f/rKAgmrDN0=
+  </data>
+ </layer>
+ <objectgroup id="8" name="Kolizje">
+  <object id="1" x="160.936" y="224.561" width="59.883" height="25.2632"/>
+  <object id="2" x="224.561" y="223.626" width="58.0117" height="29.0058"/>
+  <object id="3" x="289.123" y="223.626" width="59.883" height="27.1345"/>
+  <object id="4" x="353.684" y="223.626" width="54.269" height="29.0058"/>
+  <object id="5" x="545.497" y="222.69" width="248.889" height="29.9415"/>
+  <object id="6" x="160" y="351.813" width="250.76" height="27.1345"/>
+  <object id="7" x="543.626" y="350.877" width="250.76" height="29.0058"/>
+  <object id="8" x="544.561" y="478.129" width="250.76" height="30.8772"/>
+  <object id="9" x="160" y="479.064" width="251.696" height="30.8772"/>
+  <object id="10" x="160.936" y="606.316" width="249.825" height="30.8772"/>
+  <object id="11" x="15.9064" y="221.754" width="14.9708" height="31.8129"/>
+  <object id="12" x="15.9064" y="351.813" width="15.9064" height="29.9415"/>
+  <object id="13" x="14.9708" y="479.064" width="17.7778" height="33.6842"/>
+  <object id="14" x="16.8421" y="606.316" width="14.9708" height="31.8129"/>
+  <object id="15" x="22.4561" y="750.409" width="36.4912" height="32.7485"/>
+  <object id="16" x="928.187" y="606.316" width="13.0994" height="29.0058"/>
+  <object id="17" x="927.251" y="480" width="14.0351" height="29.9415"/>
+  <object id="18" x="928.187" y="351.813" width="12.1637" height="29.0058"/>
+  <object id="19" x="928.187" y="224.561" width="14.9708" height="31.8129"/>
+  <object id="20" x="25.2632" y="62.6901" width="50.5263" height="43.0409"/>
+  <object id="21" x="169.357" y="63.6257" width="51.462" height="42.1053"/>
+  <object id="22" x="233.918" y="62.6901" width="51.462" height="42.1053"/>
+  <object id="23" x="298.48" y="61.7544" width="49.5906" height="44.9123"/>
+  <object id="24" x="361.17" y="63.6257" width="50.5263" height="40.2339"/>
+  <object id="25" x="552.047" y="61.7544" width="51.462" height="42.1053"/>
+  <object id="26" x="617.544" y="62.6901" width="51.462" height="42.1053"/>
+  <object id="27" x="682.105" y="62.6901" width="50.5263" height="42.1053"/>
+  <object id="28" x="746.667" y="63.6257" width="50.5263" height="41.1696"/>
+  <object id="29" x="889.825" y="62.6901" width="51.462" height="42.1053"/>
+  <object id="30" x="417.31" y="45.848" width="49.5906" height="24.3275"/>
+  <object id="31" x="498.713" y="31.8129" width="28.0702" height="17.7778"/>
+  <object id="32" x="479.064" y="76.7251" width="51.462" height="26.1988"/>
+  <object id="33" x="60.8187" y="365.848" width="53.3333" height="24.3275"/>
+  <object id="34" x="110.409" y="329.357" width="50.5263" height="28.0702"/>
+  <object id="35" x="110.409" y="408.889" width="52.3977" height="29.9415"/>
+  <object id="36" x="350.877" y="513.684" width="66.4327" height="60.8187"/>
+  <object id="37" x="543.626" y="384.561" width="65.4971" height="62.6901"/>
+  <object id="38" x="727.953" y="261.053" width="60.8187" height="56.1404"/>
+ </objectgroup>
+</map>

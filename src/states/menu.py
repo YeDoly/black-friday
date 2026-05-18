@@ -31,22 +31,28 @@ class MenuState(BaseState):
     @override
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
+            if self.start_btn.is_clicked(event):
+                self.manager.change_state("GAME")
             if self.options_btn.is_clicked(event):
                 self.manager.change_state("OPTIONS")
             if self.exit_btn.is_clicked(event):
                 self.manager.quit()
 
+    @override
     def update(self, dt: float):
         pass
 
+    @override
     def draw(self, screen: pygame.Surface):
         screen.blit(self.bg, (0, 0))
         self.start_btn.draw(screen)
         self.options_btn.draw(screen)
         self.exit_btn.draw(screen)
 
+    @override
     def enter(self):
         print("Menu wejście")
 
+    @override
     def exit(self):
         print("Menu wyjście")

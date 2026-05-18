@@ -3,6 +3,7 @@ import pygame
 from config.literals import iSTATES
 from config.settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
 from states.base import BaseState
+from states.game import GameState
 from states.menu import MenuState
 from states.options import OptionsState
 
@@ -16,22 +17,29 @@ class StateManager:
         )
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self.__running: bool = True
-        pygame.display.set_caption("Czarny piątek - Kradnij jak czarnuch")
+        pygame.display.set_caption("Czarni i wściekli")
 
         self.assets: AssetsManager = assets
         self.assets.load_all()
 
         self.states: dict[iSTATES, BaseState] = {
             "MENU": MenuState(self),
-            # "GAME": GameState(self),
+            "GAME": GameState(self),
             "OPTIONS": OptionsState(self),
         }
 
         self.current_state: BaseState = self.states["MENU"]
+        self.current_state.enter()
 
     def change_state(self, state_name: iSTATES):
         """Zmienia aktywny widok na inny."""
+
+        if self.current_state:
+            self.current_state.exit()
+
         self.current_state = self.states[state_name]
+
+        self.current_state.enter()
 
     def run(self):
         """Główna pętla gry."""
