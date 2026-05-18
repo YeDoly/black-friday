@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="46">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="49">
  <properties>
   <property name="kolizja" type="bool" value="true"/>
  </properties>
@@ -7,9 +7,18 @@
  <tileset firstgid="4151" source="kafelki2.tsx"/>
  <tileset firstgid="8301" source="kafelki3.tsx"/>
  <tileset firstgid="13997" source="kafelki4.tsx"/>
+ <tileset firstgid="16201" source="kafelki5.tsx"/>
  <layer id="1" name="Podłoga" width="60" height="50">
   <data encoding="base64" compression="zlib">
    eJzt0bEJwDAUQ8E/mLNSsn8XD2EQyFeI1+vWzDx765K+e99FTf/Nly9fvnz58u1v+m++fPny5cuXb3/Tf/Ply5cvX758+5v+my9fvnz58uXb3/TffPny5cuXL9/+pv/my/dkf0JB6iI=
+  </data>
+ </layer>
+ <layer id="10" name="Kasy" width="60" height="50">
+  <properties>
+   <property name="kolizja" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzt1LcNwDAQBEF2xlje9l+LrgClggByBtj8L/lSAAAAAAAAAADg3VBLGdOU5vr3Nd9bsnFNW9o72Htk45mudHewF1riP7fNfwZ69gDrtQ1F
   </data>
  </layer>
  <layer id="3" name="Regały" width="60" height="50">
@@ -93,5 +102,7 @@
   <object id="36" x="350.877" y="513.684" width="66.4327" height="60.8187"/>
   <object id="37" x="543.626" y="384.561" width="65.4971" height="62.6901"/>
   <object id="38" x="727.953" y="261.053" width="60.8187" height="56.1404"/>
+  <object id="47" x="623.904" y="603.509" width="64.0044" height="19.3421"/>
+  <object id="48" x="624.029" y="700.819" width="64.0044" height="18.1564"/>
  </objectgroup>
 </map>
