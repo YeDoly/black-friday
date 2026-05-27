@@ -51,6 +51,13 @@ class Customer:
 
         self._load_sprites()
 
+        # Timer when klient jest 'utknięty' i próbuje wydostać się ze krawędzi
+        self.stuck_timer: float = 0.0
+        # Precompute centroid to allow cofanie się do wnętrza strefy
+        cx = sum(p[0] for p in polygon) / len(polygon)
+        cy = sum(p[1] for p in polygon) / len(polygon)
+        self._centroid = (cx, cy)
+
     def _load_sprites(self) -> None:
         target = (cfg.PLAYER_W * cfg.ZOOM, cfg.PLAYER_H * cfg.ZOOM)
 
@@ -143,6 +150,25 @@ class Customer:
                     return True
             return False
 
+        # Jeśli jesteśmy w stanie 'utknięcia', najpierw spróbuj przemieścić się w stronę centroidu
+        if self.stuck_timer > 0.0:
+            self.stuck_timer -= dt
+            cx, cy = self._centroid
+            ddx = cx - self.x
+            ddy = cy - self.y
+            distc = math.hypot(ddx, ddy)
+            if distc > 1.0:
+                rx = ddx / distc
+                ry = ddy / distc
+                nx = self.x + rx * step
+                ny = self.y + ry * step
+                if not point_blocked(nx, ny):
+                    self._facing_right = rx > 0
+                    self.x = nx
+                    self.y = ny
+                    return
+            # jeśli nie udało się cofnąć - kontynuuj do wyboru nowego celu dalej poniżej
+
         # Próba bezpośredniego kroku w stronę celu
         next_x = self.x + dir_x * step
         next_y = self.y + dir_y * step
@@ -167,10 +193,20 @@ class Customer:
                 self.y = ny
                 return
 
-        # Jeśli nic nie działa (np. klient utknął), wybierz nowy cel wewnątrz strefy
-        self._pick_new_target()
-        self.state = "IDLE"
-        self.idle_timer = random.uniform(0.5, 1.5)
+        # Jeśli nic nie działa (np. klient utknął), ustaw timer 'utknięcia' i spróbuj cofnąć się do wnętrza
+        self.stuck_timer = 0.6  # sekundy podczas których będzie próbował cofnąć się do centroidu
+        # Dodatkowo wybierz cel dalej wewnątrz (przesunięcie centroidu bliżej środka)
+        cx, cy = self._centroid
+        # Nowy cel to punkt między obecnym centroidem a środkiem poligonu, bliżej środka
+        nx_target = (self.x + cx) / 2.0
+        ny_target = (self.y + cy) / 2.0
+        if self._is_point_in_polygon(nx_target, ny_target) and not any(r.collidepoint(nx_target, ny_target) for r in self.collision_rects):
+            self.target_x = nx_target
+            self.target_y = ny_target
+        else:
+            # fallback - zwykły nowy cel
+            self._pick_new_target()
+        self.state = "MOVING"
         return
 
     def _is_point_in_polygon(self, x: float, y: float) -> bool:
