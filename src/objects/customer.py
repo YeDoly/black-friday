@@ -19,6 +19,7 @@ class Customer:
         start_y: float,
         customer_type: int,
         polygon: list[tuple[float, float]],
+        collision_rects: list[pygame.Rect] | None = None,
     ) -> None:
         self.x: float = start_x
         self.y: float = start_y
@@ -39,11 +40,14 @@ class Customer:
         self.idle_timer: float = random.uniform(1.0, 3.0)
         self.speed: float = cfg.PLAYER_SPEED * random.uniform(0.6, 0.9)
 
-        # Wyliczenie granic do optymalizacji losowania punktów
+        # Granice dla szybkiego losowania punktów wewnątrz poligonu
         self.min_x = min(p[0] for p in polygon)
         self.max_x = max(p[0] for p in polygon)
         self.min_y = min(p[1] for p in polygon)
         self.max_y = max(p[1] for p in polygon)
+
+        # Lista prostokątów kolizji (z MapManagera) - może być None
+        self.collision_rects: list[pygame.Rect] = collision_rects or []
 
         self._load_sprites()
 
@@ -101,12 +105,14 @@ class Customer:
         for _ in range(max_attempts):
             tx = random.uniform(self.min_x, self.max_x)
             ty = random.uniform(self.min_y, self.max_y)
+            # Musi być wewnątrz wieloboku i nie leżeć w obszarze kolizji
             if self._is_point_in_polygon(tx, ty):
-                self.target_x = tx
-                self.target_y = ty
-                return
+                if not any(rect.collidepoint(tx, ty) for rect in self.collision_rects):
+                    self.target_x = tx
+                    self.target_y = ty
+                    return
 
-        # Jeśli nie uda się wylosować (nie powinno się zdarzyć), klient stoi w miejscu
+        # Jeśli nie uda się wylosować (np. strefa jest mała), klient stoi w miejscu
         self.target_x = self.x
         self.target_y = self.y
 
@@ -124,23 +130,48 @@ class Customer:
         dir_x = dx / distance
         dir_y = dy / distance
 
-        self._facing_right = dir_x > 0
+        step = self.speed * dt
+        if step <= 0:
+            return
 
-        # Proponowana następna pozycja po wykonaniu kroku ruchu
-        next_x = self.x + dir_x * self.speed * dt
-        next_y = self.y + dir_y * self.speed * dt
+        # Helper sprawdzający, czy punkt jest dopuszczalny (wewnątrz poligonu i bez kolizji)
+        def point_blocked(nx: float, ny: float) -> bool:
+            if not self._is_point_in_polygon(nx, ny):
+                return True
+            for rect in self.collision_rects:
+                if rect.collidepoint(nx, ny):
+                    return True
+            return False
 
-        # Jeśli kolejny krok wychodzi poza wielobok, nie poruszamy się poza niego.
-        # Zamiast tego wybieramy nowy cel wewnątrz strefy.
-        if self._is_point_in_polygon(next_x, next_y):
+        # Próba bezpośredniego kroku w stronę celu
+        next_x = self.x + dir_x * step
+        next_y = self.y + dir_y * step
+        if not point_blocked(next_x, next_y):
+            self._facing_right = dir_x > 0
             self.x = next_x
             self.y = next_y
-        else:
-            # Unikamy wychodzenia poza obszar - wyznacz inny cel i przejdź w tryb IDLE
-            self._pick_new_target()
-            self.state = "IDLE"
-            self.idle_timer = random.uniform(0.5, 1.5)
             return
+
+        # Jeśli bezpośrednia ścieżka jest zablokowana, spróbuj wykonać małe odchylenia
+        # wokół kierunku ruchu (lokalne omijanie) — proste podejście do pathfindingu.
+        offsets = [15, -15, 30, -30, 45, -45, 60, -60, 90, -90, 120, -120, 150, -150, 180]
+        for deg in offsets:
+            theta = math.radians(deg)
+            rx = dir_x * math.cos(theta) - dir_y * math.sin(theta)
+            ry = dir_x * math.sin(theta) + dir_y * math.cos(theta)
+            nx = self.x + rx * step
+            ny = self.y + ry * step
+            if not point_blocked(nx, ny):
+                self._facing_right = rx > 0
+                self.x = nx
+                self.y = ny
+                return
+
+        # Jeśli nic nie działa (np. klient utknął), wybierz nowy cel wewnątrz strefy
+        self._pick_new_target()
+        self.state = "IDLE"
+        self.idle_timer = random.uniform(0.5, 1.5)
+        return
 
     def _is_point_in_polygon(self, x: float, y: float) -> bool:
         """Standardowy, niezawodny algorytm Even-Odd do ray-castingu na wielobokach."""
