@@ -48,6 +48,9 @@ class Customer:
 
         # Lista prostokątów kolizji (z MapManagera) - może być None
         self.collision_rects: list[pygame.Rect] = collision_rects or []
+        # Waypoints dla ścieżki (world coords)
+        self._waypoints: list[tuple[float, float]] = []
+        self._current_wp_idx: int = 0
 
         self._load_sprites()
 
@@ -108,20 +111,66 @@ class Customer:
             self._anim_frame = 0
 
     def _pick_new_target(self) -> None:
+        # Najpierw spróbuj wygenerować losowy punkt wewnątrz strefy niebędący w kolizji
         max_attempts = 100
         for _ in range(max_attempts):
             tx = random.uniform(self.min_x, self.max_x)
             ty = random.uniform(self.min_y, self.max_y)
-            # Musi być wewnątrz wieloboku i nie leżeć w obszarze kolizji
-            if self._is_point_in_polygon(tx, ty):
-                if not any(rect.collidepoint(tx, ty) for rect in self.collision_rects):
-                    self.target_x = tx
-                    self.target_y = ty
-                    return
+            if self._is_point_in_polygon(tx, ty) and not any(rect.collidepoint(tx, ty) for rect in self.collision_rects):
+                self.target_x = tx
+                self.target_y = ty
+                self._waypoints = []
+                self._current_wp_idx = 0
+                return
 
-        # Jeśli nie uda się wylosować (np. strefa jest mała), klient stoi w miejscu
+        # Jeśli losowy punkt nie znalazł się - spróbuj wyznaczyć cel na siatce nawigacyjnej (A*)
+        try:
+            from systems.navigation import build_grid, astar, tile_to_world
+            # find corresponding nav grid by matching polygon reference in map manager if available
+            map_mgr = None
+            # attempt to find map manager via global variable (manager injection happens from states/game)
+            # As fallback, don't use A*
+            if hasattr(self, 'collision_rects'):
+                # assume caller passed map manager grid via global cache on MapManager
+                import gc
+                for obj in gc.get_objects():
+                    if obj.__class__.__name__ == 'MapManager' and hasattr(obj, '_nav_grids'):
+                        map_mgr = obj
+                        break
+            if map_mgr is not None and map_mgr._nav_grids:
+                # find best matching poly index by containment of current position
+                for idx, (grid, gw, gh) in enumerate(map_mgr._nav_grids):
+                    # attempt to build path using this grid
+                    sx = int(self.x // cfg.TILE_SIZE)
+                    sy = int(self.y // cfg.TILE_SIZE)
+                    gx = int((self.x) // cfg.TILE_SIZE)
+                    gy = int((self.y) // cfg.TILE_SIZE)
+                    # choose random goal tile inside grid
+                    found = False
+                    for tx in range(gw):
+                        for ty in range(gh):
+                            if grid[tx][ty]:
+                                gx, gy = tx, ty
+                                found = True
+                                break
+                        if found:
+                            break
+                    if not found:
+                        continue
+                    path = astar(grid, (sx, sy), (gx, gy), allow_diagonal=True)
+                    if path:
+                        self._waypoints = [tile_to_world(t) for t in path]
+                        self._current_wp_idx = 0
+                        self.target_x, self.target_y = self._waypoints[-1]
+                        return
+        except Exception:
+            pass
+
+        # fallback: klient stoi w miejscu
         self.target_x = self.x
         self.target_y = self.y
+        self._waypoints = []
+        self._current_wp_idx = 0
 
     def _move_towards_target(self, dt: float) -> None:
         dx = self.target_x - self.x
@@ -168,6 +217,39 @@ class Customer:
                     self.y = ny
                     return
             # jeśli nie udało się cofnąć - kontynuuj do wyboru nowego celu dalej poniżej
+
+        # Jeśli mamy waypointy, dąż do bieżącego waypointa zamiast bezpośrednio do targetu
+        if self._waypoints and self._current_wp_idx < len(self._waypoints):
+            wx, wy = self._waypoints[self._current_wp_idx]
+            dxw = wx - self.x
+            dyw = wy - self.y
+            distw = math.hypot(dxw, dyw)
+            if distw < cfg.TILE_SIZE * 0.3:
+                # przeskocz do następnego waypointa
+                self._current_wp_idx += 1
+                if self._current_wp_idx >= len(self._waypoints):
+                    self.state = 'IDLE'
+                    self.idle_timer = random.uniform(1.0, 2.5)
+                    return
+                wx, wy = self._waypoints[self._current_wp_idx]
+                dxw = wx - self.x
+                dyw = wy - self.y
+                distw = math.hypot(dxw, dyw)
+            if distw > 0:
+                dirx = dxw / distw
+                diry = dyw / distw
+                next_x = self.x + dirx * step
+                next_y = self.y + diry * step
+                if not point_blocked(next_x, next_y):
+                    self._facing_right = dirx > 0
+                    self.x = next_x
+                    self.y = next_y
+                    return
+                # jeśli waypoint jest zablokowany, odrzuć ścieżkę i wybierz nowy cel
+                self._waypoints = []
+                self._current_wp_idx = 0
+                self._pick_new_target()
+                return
 
         # Próba bezpośredniego kroku w stronę celu
         next_x = self.x + dir_x * step
