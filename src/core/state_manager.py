@@ -6,6 +6,7 @@ from states.base import BaseState
 from states.game import GameState
 from states.menu import MenuState
 from states.options import OptionsState
+from world.map_manager import MapManager
 
 from .assets_manager import AssetsManager
 
@@ -17,10 +18,12 @@ class StateManager:
         )
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self.__running: bool = True
-        pygame.display.set_caption("Czarni i wściekli")
+        pygame.display.set_caption("Black Friday")
 
         self.assets: AssetsManager = assets
         self.assets.load_all()
+
+        self.map: MapManager = MapManager()
 
         self.states: dict[iSTATES, BaseState] = {
             "MENU": MenuState(self),

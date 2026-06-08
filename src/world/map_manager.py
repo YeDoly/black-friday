@@ -4,6 +4,7 @@ import pygame
 import pytmx
 
 import config.settings as cfg
+from systems.shopping_list import Product
 
 
 class MapManager:
@@ -19,13 +20,14 @@ class MapManager:
         self.kolizja_tiles: list[tuple[pygame.Surface, int, int, int]] = []
         self.collision_rects: list[pygame.Rect] = []
 
-        # Nowa zmienna przechowująca wieloboki stref dla klientów
         self.customer_zones: list[list[tuple[float, float]]] = []
+        self.cashier_zones: list[tuple[float, float]] = []
+        self.product_zones: list[tuple[Product | None, pygame.Rect]] = []
+        self.buy_zones: list[pygame.Rect] = []
 
         self.pixel_w: int = 0
         self.pixel_h: int = 0
 
-        # Cache przeskalowanych kafelków (id(img) -> scaled_img)
         self._tile_cache: dict[int, pygame.Surface] = {}
 
     def load_map(self, map_path: str) -> None:
@@ -34,8 +36,9 @@ class MapManager:
         self.kolizja_tiles = []
         self.collision_rects = []
         self.customer_zones = []
-        # Cache na siatki nawigacyjne per strefa (index -> grid)
-        self._nav_grids: list[tuple] = []  # (grid, w, h)
+        self.cashier_zones = []
+        self.product_zones = []
+        self.buy_zones = []
 
         tmap: pytmx.TiledMap = pytmx.load_pygame(map_path, pixelalpha=True)
 
@@ -46,14 +49,11 @@ class MapManager:
         self.floor_surface = pygame.Surface((mw, mh), pygame.SRCALPHA)
         self.static_surface = pygame.Surface((mw, mh), pygame.SRCALPHA)
 
-        kolizje_zones: list[pygame.Rect] = []
-
-        # Parsowanie warstw obiektowych
         for layer in tmap.layers:
             if isinstance(layer, pytmx.TiledObjectGroup):
                 if layer.name == "Kolizje":
                     for obj in layer:
-                        kolizje_zones.append(
+                        self.collision_rects.append(
                             pygame.Rect(
                                 int(obj.x),
                                 int(obj.y),
@@ -63,14 +63,18 @@ class MapManager:
                         )
                 elif layer.name == "Klienci":
                     for obj in layer:
-                        # Jeśli narysowałeś wielobok (Polygon) w Tiled
-                        if hasattr(obj, "points"):
-                            poly = [
-                                (float(obj.x + p.x), float(obj.y + p.y))
-                                for p in obj.points
-                            ]
+                        pts: list[tuple[float, float]] | None = getattr(
+                            obj, "polygon", getattr(obj, "points", None)
+                        )
+
+                        if pts:
+                            poly: list[tuple[float, float]] = []
+                            for p in pts:
+                                px = float(p[0])
+                                py = float(p[1])
+                                poly.append((px, py))
+
                             self.customer_zones.append(poly)
-                        # Fallback jeśli narysujesz zwykły prostokąt
                         else:
                             poly = [
                                 (float(obj.x), float(obj.y)),
@@ -79,25 +83,38 @@ class MapManager:
                                 (float(obj.x), float(obj.y + obj.height)),
                             ]
                             self.customer_zones.append(poly)
+                elif layer.name == "Kasjerzy":
+                    for obj in layer:
+                        width = float(getattr(obj, "width", 0))
+                        height = float(getattr(obj, "height", 0))
 
-        for zone in kolizje_zones:
-            self.collision_rects.append(
-                pygame.Rect(zone.x, zone.y, zone.width, zone.height)
-            )
+                        self.cashier_zones.append(
+                            (float(obj.x + width), float(obj.y + height + 10))
+                        )
+                elif layer.name == "Produkty":
+                    for obj in layer:
+                        self.product_zones.append(
+                            (
+                                None,
+                                pygame.Rect(
+                                    int(obj.x),
+                                    int(obj.y),
+                                    int(obj.width),
+                                    int(obj.height),
+                                ),
+                            )
+                        )
+                elif layer.name == "Zakup":
+                    for obj in layer:
+                        self.buy_zones.append(
+                            pygame.Rect(
+                                int(obj.x),
+                                int(obj.y),
+                                int(obj.width),
+                                int(obj.height),
+                            )
+                        )
 
-        # Zbuduj siatki nawigacyjne dla każdej strefy klientów jeśli istnieją
-        try:
-            from systems.navigation import build_grid
-
-            self._nav_grids = []
-            for poly in self.customer_zones:
-                grid_info = build_grid(self, poly)
-                self._nav_grids.append(grid_info)
-        except Exception:
-            # W przypadku błędu - zostaw pustą listę, klienci użyją fallbacku
-            self._nav_grids = []
-
-        # Parsowanie warstw kafelkowych
         for layer in tmap.layers:
             if not isinstance(layer, pytmx.TiledTileLayer):
                 continue
@@ -123,7 +140,7 @@ class MapManager:
                     self.static_surface.blit(img, (px, py))
 
                 else:
-                    sort_y = self._find_sort_y(tile_rect, kolizje_zones)
+                    sort_y = self._find_sort_y(tile_rect, self.collision_rects)
                     self.kolizja_tiles.append((img, px, py, sort_y))
 
     def get_scaled_tile(self, img: pygame.Surface) -> pygame.Surface:
@@ -138,8 +155,6 @@ class MapManager:
     def _find_sort_y(self, tile_rect: pygame.Rect, zones: list[pygame.Rect]) -> int:
         """
         Wyznacza klucz Y-sortowania dla kafla.
-        Szuka najbliższej strefy kolizji w tej samej kolumnie X i synchronizuje
-        wszystkie kafelki danego obiektu do wspólnego punktu Y.
         """
         candidates = [
             z for z in zones if z.left < tile_rect.right and z.right > tile_rect.left

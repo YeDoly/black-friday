@@ -13,14 +13,14 @@ class OptionsState(BaseState):
     def __init__(self, manager: IStateManager):
         super().__init__(manager)
 
-        self.bg: pygame.Surface = self.manager.assets.get_image("gui/background")
+        self.bg: pygame.Surface = self.manager.assets.images.get("gui/background")
         self.bg = pygame.transform.scale(self.bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-        play_img = self.manager.assets.get_image("gui/buttons/play")
+        play_img = self.manager.assets.images.get("gui/buttons/play")
         play_img = pygame.transform.scale(play_img, (200, 80))
         self.start_btn: Button = Button(0, 0, play_img)
 
-        exit_img = self.manager.assets.get_image("gui/buttons/exit")
+        exit_img = self.manager.assets.images.get("gui/buttons/exit")
         exit_img = pygame.transform.scale(exit_img, (200, 80))
         self.exit_btn: Button = Button(400, 0, exit_img)
 
@@ -32,16 +32,20 @@ class OptionsState(BaseState):
             if self.exit_btn.is_clicked(event):
                 self.manager.quit()
 
+    @override
     def update(self, dt: float):
         pass
 
+    @override
     def draw(self, screen: pygame.Surface):
         screen.blit(self.bg, (0, 0))
         self.start_btn.draw(screen)
         self.exit_btn.draw(screen)
 
+    @override
     def enter(self):
         print("Menu wejście")
 
+    @override
     def exit(self):
         print("Menu wyjście")

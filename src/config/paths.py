@@ -8,6 +8,8 @@ IMAGES_DIR = ASSETS_DIR / "images"
 SOUNDS_DIR = ASSETS_DIR / "sounds"
 FONTS_DIR = ASSETS_DIR / "fonts"
 
+MAP_DIR = ASSETS_DIR / "map"
+
 ENTITIES_DIR = IMAGES_DIR / "entities"
 SPRITES_DIR = IMAGES_DIR / "sprites"
 TILES_DIR = IMAGES_DIR / "tiles"
