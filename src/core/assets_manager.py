@@ -4,8 +4,58 @@ from pathlib import Path
 
 import pygame
 
-from config.paths import ASSETS_DIR, FONTS_DIR, IMAGES_DIR
+from config.paths import ASSETS_DIR, FONTS_DIR, IMAGES_DIR, MUSIC_DIR
 from utils.assets_loader import load_images_from_folder
+
+
+class MusicContainer:
+    """Sub-menedżer odpowiedzialny wyłącznie za zasoby muzyczne."""
+
+    def __init__(self) -> None:
+        self._storage: dict[str, Path] = {}
+
+    def play(self, key: str, loops: int = -1) -> None:
+        """Odtwarza muzykę z podanym kluczem."""
+        if key in self._storage:
+            try:
+                pygame.mixer.music.load(str(self._storage[key]))
+                pygame.mixer.music.play(loops=loops)
+            except pygame.error:
+                print(f"[BŁĄD] Nie udało się odtworzyć pliku muzyki: {key}")
+        else:
+            print(f"[OSTRZEŻENIE] Brak assetu muzycznego o kluczu: {key}")
+
+    def pause(self) -> None:
+        """Wstrzymuje odtwarzanie muzyki."""
+        pygame.mixer.music.pause()
+
+    def volume(self, level: float) -> None:
+        """Ustawia głośność odtwarzania muzyki (0.0 - 1.0)."""
+        if 0.0 <= level <= 1.0:
+            pygame.mixer.music.set_volume(level)
+        else:
+            print(f"[OSTRZEŻENIE] Nieprawidłowy poziom głośności: {level}")
+
+    def load(self, directory: Path) -> None:
+        """Indeksuje ścieżki do plików muzycznych w folderze."""
+        if directory.exists():
+            for ext in ("*.mp3", "*.ogg", "*.wav"):
+                for music_file in directory.rglob(ext):
+                    print(music_file.stem)
+                    self._storage[music_file.stem] = music_file
+            print(
+                f"[ASSET MANAGER] Znaleziono łącznie {len(self._storage)} wariantów muzyki."
+            )
+        else:
+            print(f"[BŁĄD] Nie znaleziono folderu z muzyką: {directory}")
+
+    def get(self, key: str) -> Path | None:
+        """Zwraca ścieżkę do pliku muzycznego po kluczu."""
+        if key in self._storage:
+            return self._storage[key]
+
+        print(f"[OSTRZEŻENIE] Brak assetu muzycznego o kluczu: {key}")
+        return None
 
 
 class ImageContainer:
@@ -85,8 +135,10 @@ class AssetsManager:
 
         self.images: ImageContainer = ImageContainer()
         self.fonts: FontContainer = FontContainer()
+        self.music: MusicContainer = MusicContainer()
 
     def load_all(self) -> None:
         """Inicjalizuje ładowanie wszystkich sub-kontenerów."""
         self.images.load(IMAGES_DIR)
         self.fonts.load(FONTS_DIR)
+        self.music.load(MUSIC_DIR)

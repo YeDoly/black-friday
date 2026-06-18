@@ -3,7 +3,6 @@ from __future__ import annotations
 import pygame
 
 import config.settings as cfg
-from systems.shopping_list import Product
 
 
 class Player:

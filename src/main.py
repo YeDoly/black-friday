@@ -11,6 +11,8 @@ if __name__ == "__main__":
     assets = AssetsManager()
     app = StateManager(assets)
 
+    assets.music.volume(0.1)
+    assets.music.play("1")
     app.run()
 
     pygame.quit()
