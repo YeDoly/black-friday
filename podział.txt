@@ -1,0 +1,23 @@
+Olivia
+- pomysł na gre
+- assets: Grafika, muzyka, mapa, dobór czcionki, postacie, produkty, ekran główny i opcje, kolizje
+- testowanie: testowanie gry, poprawki błędów
+- config: podpięcie wszystkich ustawień i ścieżek do plików
+- łączenie modułów w spójną całość, podpinanie muzyki, protokoły interfejsów/klas, renderowanie produktów
+- lista zakupów, licznik czasu i zapisywanie rekordu do pliku, menu
+
+
+Mateusz
+- logika chodzenia, logika klientów, wstawienie kasjerów, renderowanie mapy, zbieranie produktów,
+  podpięcie mapy, mechanika gry i kolizji, kamera, wczytywanie assetów (utils), state manager, reszta assets managera, podział na pliki
+- typowanie: dodawanie typowania do całości
+
+
+Materiały pomocniczne:
+- Tiled - tworzenie mapy
+- Gemini: y-sorting - shout out za to
+- https://www.pygame.org/tags/all
+- https://www.pygame.org/wiki/tutorials
+- https://www.pygame.org/wiki/GettingStarted
+- https://www.pygame.org/docs/
+- Hindusi na youtube

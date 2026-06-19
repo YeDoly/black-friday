@@ -90,7 +90,6 @@ class Customer:
                 self._is_moving = True
                 self._move_towards_target(dt)
 
-        # Animacja
         if self._is_moving:
             self._anim_timer += dt
             if self._anim_timer >= cfg.WALK_FRAME_DURATION:
